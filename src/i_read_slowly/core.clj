@@ -7,8 +7,7 @@
 ;; My Account https://catalog.nypl.org/patroninfo/0/top
 ;; My Checked Out Items https://catalog.nypl.org/patroninfo/0/items
 
-;; hm, doesn't seem to work. not sure how output streams for java
-;; libraries are handled...
+;; doesn't work to silence output of java libraries, it seems...
 (defmacro with-silence [& body]
   `(let [dev-null# (java.io.StringWriter.)]
      (binding [*out* dev-null#
