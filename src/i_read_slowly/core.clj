@@ -1,13 +1,21 @@
 (ns i-read-slowly.core
-  (:import (com.gargoylesoftware.htmlunit WebClient BrowserVersion))
+  (:import (com.gargoylesoftware.htmlunit
+            WebClient SilentCssErrorHandler))
   (:use [clojure.contrib.command-line :only [with-command-line]])
   (:gen-class))
 
 ;; My Account https://catalog.nypl.org/patroninfo/0/top
 ;; My Checked Out Items https://catalog.nypl.org/patroninfo/0/items
 
-;; note: using BrowserVersion/FIREFOX_3_6 causes a ScriptException.
-;; Fine with default IE7.
+;; hm, doesn't seem to work. not sure how output streams for java
+;; libraries are handled...
+(defmacro with-silence [& body]
+  `(let [dev-null# (java.io.StringWriter.)]
+     (binding [*out* dev-null#
+               *err* dev-null#]
+       (try (do ~@body)
+            (catch Exception _# )))))
+
 (defn login [user pass client]
   (let [page (.getPage client "https://catalog.nypl.org/patroninfo/0/items")
         [form] (.getForms page)
@@ -25,13 +33,26 @@
         yes (.getInputByName checkout-form "renewall")]
     (.click yes)))
 
+;; these help a little, but still really noisy.
+;; inc-listen (proxy [com.gargoylesoftware.htmlunit.IncorrectnessListener] []
+;;              [notify [_message _origin]
+;;               (println "<silenced incorrectness notification>")])
+;; wc (doto (WebClient.)
+;;      (.setIncorrectnessListener inc-listen)
+;;      (.setCssErrorHandler (SilentCssErrorHandler.))
+;;      ;(.setThrowExceptionOnFailingStatusCode false)
+;;      ;(.setThrowExceptionOnScriptError false)
+;;      )
 (defn doit [user pass]
-  ;; note: does not appear to work if wc is not bound here. Do not
-  ;; understand why.
+  (println "Doing it!")
   (let [wc (WebClient.)
         items-page (login user pass wc)
-        result (renew-all items-page)]
-    (.asXml result)))
+        _ (println "Logged in. Renewing...")
+        result (renew-all items-page)
+        _ (println "Renewed!")
+        page (.asText result)]
+    (.closeAllWindows wc)
+    page))
 
 (defn -main [& args]
   (with-command-line args
