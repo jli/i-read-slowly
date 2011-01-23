@@ -1,5 +1,5 @@
 (ns i-read-slowly.core
-  (:import (com.gargoylesoftware.htmlunit WebClient))
+  (:import (com.gargoylesoftware.htmlunit WebClient BrowserVersion))
   (:use [clojure.contrib.command-line :only [with-command-line]])
   (:gen-class))
 
@@ -26,7 +26,10 @@
     (.click yes)))
 
 (defn doit [user pass]
-  (let [items-page (login user pass (WebClient.))
+  ;; note: does not appear to work if wc is not bound here. Do not
+  ;; understand why.
+  (let [wc (WebClient.)
+        items-page (login user pass wc)
         result (renew-all items-page)]
     (.asXml result)))
 
