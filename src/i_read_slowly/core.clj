@@ -1,14 +1,13 @@
 (ns i-read-slowly.core
-  (:import (com.gargoylesoftware.htmlunit
-            WebClient BrowserVersion ScriptException))
+  (:import (com.gargoylesoftware.htmlunit WebClient))
   (:use [clojure.contrib.command-line :only [with-command-line]])
   (:gen-class))
 
-;; My Account:https://catalog.nypl.org/patroninfo/0/top
+;; My Account https://catalog.nypl.org/patroninfo/0/top
 ;; My Checked Out Items https://catalog.nypl.org/patroninfo/0/items
 
-;;; utils
-
+;; note: using BrowserVersion/FIREFOX_3_6 causes a ScriptException.
+;; Fine with default IE7.
 (defn login [user pass client]
   (let [page (.getPage client "https://catalog.nypl.org/patroninfo/0/items")
         [form] (.getForms page)
@@ -17,12 +16,6 @@
     (.setValueAttribute barcode user)
     (.setValueAttribute pin pass)
     (.click submit)))
-
-;;(defn login-robust [user pass client]
-;;  (try (login user pass client)
-;;       (catch ScriptException _
-;;         (println "Script exception trying to login. Trying again...")
-;;         (login-robust user pass (WebClient.)))))
 
 (defn renew-all [checked-out-page]
   (let [[renew-all] (filter #(re-find #"requestRenewAll" (.getOnClickAttribute %))
@@ -33,8 +26,7 @@
     (.click yes)))
 
 (defn doit [user pass]
-  (let [wc (WebClient.)
-        items-page (login user pass wc)
+  (let [items-page (login user pass (WebClient.))
         result (renew-all items-page)]
     (.asXml result)))
 
@@ -44,8 +36,10 @@
     [[barcode b "NYPL 14 digit barcode"]
      [pin p "4 digit PIN"]
      anon]
-;;    (println "barcode, pin, anon:" barcode pin anon)))
-    (if (some nil? [barcode pin]) (println "Need both barcode and pin!")
-      (if (not (empty? anon)) (println "Didn't expect anonymous arguments:" anon)
-          (do (println "got barcode and pin:" barcode "," pin)
-              (doit barcode pin))))))
+    (when (some nil? [barcode pin])
+      (println "Need both barcode (-b) and pin (-p)!")
+      (System/exit 1))
+    (when-not (empty? anon)
+      (println "Didn't expect anonymous arguments:" anon)
+      (System/exit 1))
+    (println (doit barcode pin))))
