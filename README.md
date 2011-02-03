@@ -8,6 +8,6 @@ Working on it.
 
 ## License
 
-Copyright (C) 2010 John Li
+Copyright (C) 2010 JOHN LI!!
 
-Distributed under the WTFPL, I think?
+Distributed under the WTFPL!
