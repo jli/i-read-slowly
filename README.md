@@ -14,24 +14,24 @@ in demand and will have a hold placed. I renew once a week.
 It takes your 14-digit NYPL barcode and 4-digit pin (you might have to
 sign up for online access on their [website] (http://nypl.org)).
 
-$ lein run -help
-Renew all checked out items for NYPL account.
-Options
-  --barcode, -b <arg>  NYPL 14 digit barcode 
-  --pin, -p <arg>      4 digit PIN 
+> $ lein run -help
+> Renew all checked out items for NYPL account.
+> Options
+>   --barcode, -b <arg>  NYPL 14 digit barcode 
+>   --pin, -p <arg>      4 digit PIN 
 
 To run the program from cron, you can build an uberjar with
 [leiningen] (https://github.com/technomancy/leiningen) and run
 something like:
 
-java -jar i-read-slowly-1.0-standalone.jar -b <barcode> -p <pin>
+> java -jar i-read-slowly-1.0-standalone.jar -b <barcode> -p <pin>
 
 The program prints your checked-out items page after it tries to renew
 them, which shows if it was successful or if you've reached your renew
 limit. To get this, I just pipe the output of the program to main
 (because I don't actually get the mail generated from cron output):
 
-java -jar i-read-slowly-1.0-standalone.jar -b <barcode> -p <pin> | mail -s "i-read-slowly" you@wherever
+> java -jar i-read-slowly-1.0-standalone.jar -b <barcode> -p <pin> | mail -s "i-read-slowly" you@wherever
 
 ## License
 
