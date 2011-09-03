@@ -60,9 +60,9 @@
      [pin p "4 digit PIN"]
      anon]
     (when (some nil? [barcode pin])
-      (println "Need both barcode (-b) and pin (-p)!")
+      (println "Need both barcode (-b) and pin (-p)! See -help.")
       (System/exit 1))
     (when-not (empty? anon)
-      (println "Didn't expect anonymous arguments:" anon)
+      (println "Didn't expect other arguments:" anon ". See -help.")
       (System/exit 1))
     (println (doit barcode pin))))
